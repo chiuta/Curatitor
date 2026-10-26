@@ -1,6 +1,13 @@
 // Teste Playwright pentru Curatitor — funcționalitate reală, fixture-uri generate în test, verificări cu parsere independente
 // (parsere scrise în fixtures.mjs, qpdf/pikepdf, ffprobe/ffmpeg, ImageMagick `identify`, python zipfile).
 // Rulare: node tests/test.mjs   (variabile opționale: CURATITOR_TMP=director de lucru, SKIP_BIG=1 pentru a sări peste fișierele de 20–50 MB)
+// [fff-portable] axe-core: FFF_AXE / AXE_PATH, apoi pachetul `axe-core` (npm i -D axe-core). Dacă lipsește: undefined (testele cu axe pică cu mesaj clar).
+import {createRequire as __fffCR} from 'node:module';
+const __fffAxe = () => process.env.FFF_AXE || process.env.AXE_PATH || (() => { try { return __fffCR(import.meta.url).resolve('axe-core/axe.min.js'); } catch { return undefined; } })();
+// [fff-portable] versiunea/data/kitul aplicației se citesc din app.json (nu mai sunt hard-codate în teste)
+import {readFileSync as __fffRF} from 'node:fs';
+const __FFF_APP = JSON.parse(__fffRF(new URL('../app.json', import.meta.url), 'utf8'));
+const __fffRe = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 import { createRequire } from 'module';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -10,12 +17,13 @@ import { fileURLToPath } from 'node:url';
 import zlib from 'node:zlib';
 import * as F from './fixtures.mjs';
 
-const require = createRequire('/opt/node-tools/package.json');
+const require = createRequire(process.env.PW_ROOT || import.meta.url);
 const { chromium } = require('playwright');
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const APP = 'https://curatitor.test/index.html';
 const APP_FILE = path.resolve(HERE, '../index.html');
-const AXE = process.env.AXE_PATH || '/tmp/claude-0/-home-claude/78529928-3825-51c3-b9bd-0e81655ab6bc/scratchpad/sweep/node_modules/axe-core/axe.min.js';
+const AXE = process.env.AXE_PATH || __fffAxe();
+const KIT = [process.env.FFF_KIT, path.resolve(HERE, '../../../fff-kit'), path.resolve(HERE, '../../chiuta.github.io/fff-kit')].find((d) => d && fs.existsSync(path.join(d, 'build.mjs'))) || path.resolve(HERE, '../../../fff-kit'); // [portabil] kitul se găsește și pentru depozitul separat
 const W = process.env.CURATITOR_TMP || fs.mkdtempSync(path.join(os.tmpdir(), 'curatitor-test-'));
 fs.mkdirSync(W, { recursive: true });
 const have = (c) => spawnSync('which', [c]).status === 0;
@@ -32,7 +40,7 @@ function assert(c, m) { if (!c) throw new Error(m || 'assertion failed'); }
 function eq(a, b, m) { if (JSON.stringify(a) !== JSON.stringify(b)) throw new Error((m || 'not equal') + ': ' + JSON.stringify(a) + ' !== ' + JSON.stringify(b)); }
 const contains = (buf, s) => buf.includes(Buffer.from(s, 'utf8')) || buf.includes(Buffer.from(s, 'utf16le'));
 
-const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium', args: ['--no-sandbox'] });
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || undefined, args: ['--no-sandbox'] });
 const netReqs = [];
 async function mkCtx(opts = {}) {
   const ctx = await browser.newContext(Object.assign({ viewport: { width: 1280, height: 800 }, acceptDownloads: true, locale: 'ro-RO', serviceWorkers: 'block' }, opts));
@@ -90,9 +98,9 @@ await test('pornire: 0 erori, 0 violări CSP, 0 cereri de rețea, meta de versiu
   const p = await openApp();
   eq(await p.evaluate(() => window.__csp), [], 'violări CSP');
   eq(await p.title(), 'Curatitor');
-  eq(await p.evaluate(() => document.querySelector('meta[name=application-version]').content), '1.0.0');
-  eq(await p.evaluate(() => document.querySelector('meta[name=last-updated]').content), '2026-10-14');
-  eq(await p.textContent('#app-version'), 'v 1.0.0 · 2026-10-14');
+  eq(await p.evaluate(() => document.querySelector('meta[name=application-version]').content), __FFF_APP.version);
+  eq(await p.evaluate(() => document.querySelector('meta[name=last-updated]').content), __FFF_APP.updated);
+  eq(await p.textContent('#app-version'), `v ${__FFF_APP.version} · ${__FFF_APP.updated}`);
   eq(await p.evaluate(() => document.documentElement.lang), 'ro');
   const csp = await p.evaluate(() => document.querySelector('meta[http-equiv=Content-Security-Policy]').content);
   assert(/default-src 'none'/.test(csp) && /connect-src 'none'/.test(csp) && /worker-src 'self' blob:/.test(csp) && /manifest-src 'self'/.test(csp) && !/unsafe-eval/.test(csp) && !/script-src[^;]*unsafe-inline/.test(csp), 'CSP: ' + csp);
@@ -112,7 +120,7 @@ await test('hash-uri CSP pentru TOATE scripturile inline (recalculate independen
   eq((ss.match(/sha256-/g) || []).length, scripts.length, 'hash-uri fără script corespunzător');
   assert(!/unsafe-inline|unsafe-eval/.test(ss), 'script-src slăbit');
   eq((html.match(/<script\b[^>]*\bsrc=/g) || []).length, 0, 'script extern');
-  for (const [cmd, args] of [[process.execPath, [path.resolve(HERE, '../../../fff-kit/build.mjs'), 'check', path.resolve(HERE, '..')]], [process.execPath, [path.resolve(HERE, '../../../fff-kit/pwa/pwa.mjs'), 'check', path.resolve(HERE, '..')]]]) { const r = spawnSync(cmd, args, { encoding: 'utf8' }); assert(r.status === 0, args[1].split('/').slice(-2).join('/') + ' check: ' + r.stdout + r.stderr); }
+  for (const [cmd, args] of [[process.execPath, [path.join(KIT, 'build.mjs'), 'check', path.resolve(HERE, '..')]], [process.execPath, [path.join(KIT, 'pwa/pwa.mjs'), 'check', path.resolve(HERE, '..')]]]) { const r = spawnSync(cmd, args, { encoding: 'utf8' }); assert(r.status === 0, args[1].split('/').slice(-2).join('/') + ' check: ' + r.stdout + r.stderr); }
 });
 
 /* ===================== 2. JPEG ===================== */
@@ -480,10 +488,10 @@ await test('8 limbi: selector, html[lang], persistență, texte traduse, export/
   eq(seen.size, 8, 'texte distincte pe limbă'); await p.selectOption('#lang', 'de'); await p.reload(); await p.waitForSelector('#list',{state:'attached'}); eq(await p.evaluate(() => document.documentElement.lang), 'de'); assert((await p.textContent('#pickBtn')) === 'Dateien auswählen');
   await p.check('input[name=prof][value=max]'); await p.click('#themeBtn'); eq(await p.evaluate(() => document.documentElement.dataset.theme), 'light');
   await p.locator('footer summary').click(); const [d] = await Promise.all([p.waitForEvent('download'), p.click('#setExport')]); const sp = path.join(W, 'curatitor.fff.json'); await d.saveAs(sp); const b = JSON.parse(fs.readFileSync(sp, 'utf8'));
-  eq([b.format, b.schema, b.app, b.version, b.updated], ['fff-bundle', 1, 'curatitor', '1.0.0', '2026-10-14']); eq(b.data.lang, 'de'); eq(b.data.profile, 'max'); eq(b.data.theme, 'light');
+  eq([b.format, b.schema, b.app, b.version, b.updated], ['fff-bundle', 1, 'curatitor', __FFF_APP.version, __FFF_APP.updated]); eq(b.data.lang, 'de'); eq(b.data.profile, 'max'); eq(b.data.theme, 'light');
   await p.selectOption('#lang', 'ro'); await p.check('input[name=prof][value=keep]'); await p.setInputFiles('#setImportInput', sp); await p.waitForTimeout(300); eq(await p.evaluate(() => document.documentElement.lang), 'de'); assert(await p.isChecked('input[name=prof][value=max]'), 'profil importat');
   const bad = wr('bad.fff.json', JSON.stringify({ format: 'fff-bundle', schema: 1, app: 'altceva', data: {} })); await p.setInputFiles('#setImportInput', bad); await p.waitForTimeout(200); assert((await p.textContent('#status')).length > 0 || (await p.textContent('#setMsg')).length > 0, 'mesaj de eroare la import');
-  p.once('dialog', (dlg) => dlg.accept()); await p.click('#setWipe'); await p.waitForTimeout(200); eq(await p.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('fff.curatitor.')).length), 0, 'chei rămase'); eq(await p.evaluate(() => document.documentElement.dataset.theme || 'auto'), 'auto'); await p.close();
+  await p.click('#setWipe'); await p.click('dialog.fff-dlg .fff-primary'); await p.waitForTimeout(200); eq(await p.evaluate(() => Object.keys(localStorage).filter((k) => k.startsWith('fff.curatitor.')).length), 0, 'chei rămase'); eq(await p.evaluate(() => document.documentElement.dataset.theme || 'auto'), 'auto'); await p.close();
 });
 await test('funcționează fără localStorage (blocat) și fără WebWorker', async () => {
   const c = await mkCtx(); await c.addInitScript(() => { Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } }); }); const p = await openApp(c);

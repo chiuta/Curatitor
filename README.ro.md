@@ -2,7 +2,7 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 1.0.0 · **Ultima actualizare:** 2026-10-14
+**Versiune:** 2.0.0 · **Ultima actualizare:** 2026-10-26
 
 Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -15,10 +15,16 @@ Curatitor îți arată ce metadate ascund fișierele tale (locație GPS, modelul
 ## Cum se folosește
 
 1. Trage fișierele pe zonă sau apasă „Alege fișiere” (sau „Încarcă exemplu”, ca să încerci cu fișiere generate în pagină).
-2. Alege politica: **Maxim**, **Păstrează orientare și culoare** (implicit) sau **Personalizat**.
+2. Alege politica: **Maxim**, **Păstrează orientare și culoare** (implicit), **Publicare**, **Jurnalism (protecția sursei)**, **Dosar oficial** sau **Personalizat**.
 3. Deschide „Detalii” pentru panoul Înainte/După: câmpurile sensibile (GPS, autor, serii, căi) sunt evidențiate; coordonatele GPS sunt arătate ca grade zecimale, cu avertisment.
 4. „Curăță” sau „Curăță tot”, apoi „Descarcă” individual sau „Descarcă ZIP cu toate”.
 5. „Doar inspectează” arată conținutul fără să modifice nimic. Raportul JSON/CSV nu conține valori sau nume de fișiere decât dacă bifezi explicit.
+
+## Curățare în lot cu politică de risc (v2.0.0)
+
+- „Alege un dosar” (sau tragerea unui dosar) scanează recursiv tot dosarul; fiecare fișier primește un nivel de risc (fără metadate / scăzut / mediu / ridicat) după ce conține: locație GPS, nume de autor sau proprietar, serie de aparat, miniatură care arată altă imagine decât cea principală.
+- Profilurile **Publicare**, **Jurnalism** și **Dosar oficial** aplică reguli diferite și au o *țintă*: nivelul maxim de risc tolerat după curățare. Sumarul arată pentru fiecare fișier riscul înainte, riscul după și verdictul față de țintă; „Raport înainte/după (HTML)” îl exportă într-un singur fișier, fără scripturi sau resurse externe (JSON-ul conține aceleași câmpuri). ZIP-ul păstrează structura de dosare.
+- Nivelul de risc privește doar metadatele. Zgomotul de senzor al aparatului rămâne în pixeli și nu poate fi șters; aplicația avertizează explicit. Detectarea miniaturii diferite este euristică (compară o amprentă de 16x16 pixeli).
 
 Totul merge de la tastatură, în 8 limbi, cu temă luminoasă/întunecată și respectarea `prefers-reduced-motion`.
 
@@ -75,3 +81,7 @@ MIT — vezi fișierul `LICENSE` din rădăcina depozitului.
 ## Istoric
 
 - 1.0.0 — 2026-10-14: prima versiune
+- 1.0.1 — 2026-10-22: „Șterge tot” folosește dialogul de confirmare din pagină, nu window.confirm; casetele și butoanele radio au ținte tactile de cel puțin 24 px; eticheta tehnică (fff-info) listează acum cele 8 limbi ale interfeței.
+- 1.0.2 — 2026-10-22: fff-kit 1.1.2: PBKDF2 cu 600.000 de iterații, protecție anti-clickjacking.
+- 1.0.3 — 2026-10-22: fff-kit 1.1.4: ținte tactile și text minim în interfața comună.
+- 1.0.5 — 2026-10-23: mesaj de rezervă când JavaScript este dezactivat (noscript).
