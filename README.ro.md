@@ -2,7 +2,7 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 2.1.0 · **Ultima actualizare:** 2026-10-27
+**Versiune:** 2.2.0 · **Ultima actualizare:** 2026-10-27
 
 **Stare:** stabil · **Offline:** complet
 
@@ -33,10 +33,10 @@ Totul merge de la tastatură, în 8 limbi, cu temă luminoasă/întunecată și 
 ## Ce NU face (și limite)
 
 - **Nu anonimizează conținutul.** Fețele, zgomotul de senzor, filigranele, numele din text și identificatorii din pixeli rămân. Curățarea metadatelor nu înseamnă anonimizare.
-- **PDF:** se neutralizează pe loc, cu aceeași lungime: dicționarul /Info este golit, iar fluxurile XMP sunt înlocuite cu un pachet minimal (și pentru versiunile vechi din actualizări incrementale). PDF criptat sau cu /Info în flux de obiecte comprimat (ObjStm) este **refuzat** (datele se pot totuși vedea). Identificatorul /ID rămâne; conformitatea PDF/A se pierde.
+- **PDF:** se neutralizează pe loc, cu aceeași lungime: dicționarul /Info este golit, iar fluxurile XMP sunt înlocuite cu un pachet minimal (și pentru versiunile vechi din actualizări incrementale). PDF criptat sau cu /Info în flux de obiecte comprimat (ObjStm) este **refuzat** (datele se pot totuși vedea). Identificatorul /ID și autorii anotărilor (/T) rămân **implicit**; două opțiuni noi (2.2.0, active în profilurile *Maxim* și *Jurnalism* și în *Personalizat*) zeroizează /ID pe loc și golesc șirurile /T ale anotărilor (doar șiruri directe din obiecte necomprimate; textul anotării rămâne). Conformitatea PDF/A se pierde.
 - **MP4/MOV/M4A:** se refuză MP4 fragmentat (moof), precum și HEIF/HEIC/AVIF. Piste de metadate cronometrate sunt doar semnalate, nu șterse; numele de handler și mesajele SEI din fluxul video nu sunt atinse.
 - **MP3:** șirul de codare Xing/LAME din primul cadru rămâne.
-- **Office/ODF:** comentariile și modificările urmărite din document sunt doar **listate**, nu modificate (autorii lor rămân în conținut). Se refuză ZIP64, arhivele criptate sau corupte.
+- **Office/ODF:** comentariile și modificările urmărite din document sunt **listate**; textul lor rămâne. Implicit rămân și autorii și datele; o opțiune nouă (2.2.0, activă în *Maxim*, *Jurnalism* și *Personalizat*) înlocuiește autorii cu `Author`, inițialele cu `A`, datele cu o valoare fixă și ID-urile de utilizator cu `anonymous` în comentarii, modificări urmărite și liste de persoane (DOCX/XLSX/PPTX, ODT/ODS/ODP). Numele scrise chiar în text nu sunt atinse. Se refuză ZIP64, arhivele criptate sau corupte.
 - **SVG:** se refuză codările non-UTF-8 și SVGZ (gzip).
 - **GIF/WebP/PNG/JPEG:** pixelii nu sunt rotiți niciodată; „Păstrează orientare” lasă doar eticheta Orientation, într-un Exif minimal.
 - Formatele nerecunoscute sunt respinse cu un mesaj clar; nu se produce niciodată o descărcare pentru un fișier refuzat.
