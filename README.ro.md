@@ -2,7 +2,9 @@
 
 [English](README.md) · **Română** · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Versiune:** 2.0.0 · **Ultima actualizare:** 2026-10-26
+**Versiune:** 2.1.0 · **Ultima actualizare:** 2026-10-27
+
+**Stare:** stabil · **Offline:** complet
 
 Limbile interfeței: **Română, English, Français, Italiano, Español, Português (PT), Deutsch, Magyar**
 
@@ -85,3 +87,4 @@ MIT — vezi fișierul `LICENSE` din rădăcina depozitului.
 - 1.0.2 — 2026-10-22: fff-kit 1.1.2: PBKDF2 cu 600.000 de iterații, protecție anti-clickjacking.
 - 1.0.3 — 2026-10-22: fff-kit 1.1.4: ținte tactile și text minim în interfața comună.
 - 1.0.5 — 2026-10-23: mesaj de rezervă când JavaScript este dezactivat (noscript).
+- 2.1.0 — 2026-10-27: panou nou pliabil „Formate acceptate și limite pe format” pe pagina principală (formate acceptate și refuzate, procesare în lot, ce rămâne în documentele PDF și Office), tradus în 8 limbi; liniile „Stare / Offline” în README.
