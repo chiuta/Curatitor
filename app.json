@@ -2,7 +2,7 @@
   "schema": 1,
   "slug": "curatitor",
   "name": "Curatitor",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "updated": "2026-10-27",
   "description": "Curatitor: vezi ce metadate conțin fișierele tale (EXIF/GPS, XMP, IPTC, autor, software) și elimină-le local, fără re-codare. JPEG, PNG, WebP, GIF, SVG, PDF, Office/ODF, MP3, FLAC, MP4.",
   "egress": [],
@@ -12,8 +12,8 @@
     "Worker"
   ],
   "storageKeys": [],
-  "sizeBytes": 440647,
-  "sha256": "ef601f4c71ff36ee262b506c317887bc57fe1bf3acc7b557edd4cc13f2eeab41",
+  "sizeBytes": 456613,
+  "sha256": "5136eedefa88bdce1a788b0bfc7406e48bf8fc60706735606d15428032df29b6",
   "csp": {
     "present": true,
     "directives": {

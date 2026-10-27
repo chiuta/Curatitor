@@ -2,7 +2,7 @@
 
 **English** · [Română](README.ro.md) · [Français](README.fr.md) · [Italiano](README.it.md) · [Español](README.es.md) · [Português](README.pt.md) · [Deutsch](README.de.md) · [Magyar](README.hu.md)
 
-**Version:** 2.1.0 · **Last updated:** 2026-10-27
+**Version:** 2.2.0 · **Last updated:** 2026-10-27
 
 **Status:** stable · **Offline:** complete
 
@@ -27,10 +27,10 @@ Everything works from the keyboard, in 8 languages, with a light/dark theme and 
 ## What it does NOT do (and limits)
 
 - **It does not anonymize the content.** Faces, sensor noise, watermarks, names in text and identifiers in pixels remain. Cleaning metadata does not mean anonymization.
-- **PDF:** neutralized in place, with the same length: the /Info dictionary is emptied, and the XMP streams are replaced with a minimal packet (also for old versions in incremental updates). An encrypted PDF or one with /Info in a compressed object stream (ObjStm) is **refused** (the data can still be viewed). The /ID identifier remains; PDF/A conformance is lost.
+- **PDF:** neutralized in place, with the same length: the /Info dictionary is emptied, and the XMP streams are replaced with a minimal packet (also for old versions in incremental updates). An encrypted PDF or one with /Info in a compressed object stream (ObjStm) is **refused** (the data can still be viewed). The /ID identifier and the annotation authors (/T) remain **by default**; two new options (2.2.0, on in the *Maximum* and *Journalism* profiles and in *Custom*) zero the /ID in place and blank the /T strings of annotations (only direct strings in uncompressed objects; the text of the annotation stays). PDF/A conformance is lost.
 - **MP4/MOV/M4A:** fragmented MP4 (moof) is refused, as are HEIF/HEIC/AVIF. Timed metadata tracks are only flagged, not deleted; handler names and SEI messages in the video stream are not touched.
 - **MP3:** the Xing/LAME encoding string in the first frame remains.
-- **Office/ODF:** the comments and tracked changes in the document are only **listed**, not modified (their authors remain in the content). ZIP64, encrypted or corrupt archives are refused.
+- **Office/ODF:** the comments and tracked changes in the document are **listed**; their text stays. By default their authors and dates also stay; a new option (2.2.0, on in *Maximum*, *Journalism* and *Custom*) replaces the authors with `Author`, the initials with `A`, the dates with a fixed value and the user IDs with `anonymous` in comments, tracked changes and people lists (DOCX/XLSX/PPTX, ODT/ODS/ODP). Names written in the text itself are not touched. ZIP64, encrypted or corrupt archives are refused.
 - **SVG:** non-UTF-8 encodings and SVGZ (gzip) are refused.
 - **GIF/WebP/PNG/JPEG:** pixels are never rotated; "Keep orientation" leaves only the Orientation tag, in a minimal Exif.
 - Unrecognized formats are rejected with a clear message; a download is never produced for a refused file.
