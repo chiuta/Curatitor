@@ -405,6 +405,14 @@ await test('MP3: ID3v2.3 (+copertă) + ID3v1 eliminate; cadrele audio identice (
   eq(streamMd5(path.join(W, 'a.out.mp3')), streamMd5(path.join(W, 'a.mp3')), 'md5 audio'); const pr = probe(path.join(W, 'a.out.mp3')); assert(!pr.format.tags || !Object.keys(pr.format.tags).some((k) => /title|artist|comment/i.test(k)), 'ffprobe tags: ' + JSON.stringify(pr.format.tags));
   eq(pr.streams.length, 1, 'doar audio'); assert(out[0] === 0xFF && (out[1] & 0xE0) === 0xE0, 'începe cu sync MPEG'); await p.close();
 });
+await test('MP3 în Worker (?worker=always): ID3v1 citit și curățat la fel ca în firul principal (ajutorul de regex serializat există și în Worker)', async () => {
+  if (!have('ffmpeg') || !fs.existsSync(path.join(W, 'a.mp3'))) return;
+  const before = pageErrors.length; const pw = await openApp(ctx, APP + '?worker=always'); await load(pw, [path.join(W, 'a.mp3')]);
+  eq((await stateOf(pw))[0].where, 'worker', 'trebuie să ruleze în Worker'); const body = await pw.textContent('#detailBody');
+  for (const s of ['Titlu-Mp3-Secret', 'ID3v1']) assert(body.includes(s), 'panou Worker: ' + s);
+  await cleanAll(pw); const out = await download(pw, 'a.mp3', path.join(W, 'a.w.mp3')); assert(!contains(out, 'Mp3-Secret') && !contains(out, 'ID3'), 'etichete rămase (Worker)');
+  eq(pageErrors.slice(before), [], 'erori de pagină'); eq(await pw.evaluate(() => window.__csp), [], 'CSP'); await pw.close();
+});
 await test('FLAC: VORBIS_COMMENT/PICTURE eliminate; STREAMINFO + cadre identice (md5 decodare), ffprobe fără etichete', async () => {
   if (!have('ffmpeg')) return;
   const cover = path.join(W, 'cover.jpg');
